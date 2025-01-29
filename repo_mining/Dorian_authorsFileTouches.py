@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import requests
 import csv
@@ -21,10 +22,10 @@ def github_auth(url, lsttoken, ct):
         print(e)
     return jsonData, ct
 
-# @dictFiles, empty dictionary of files
 # @lstTokens, GitHub authentication tokens
 # @repo, GitHub repo
-def countfiles(dictfiles, lsttokens, repo):
+def count_authorsFileTouches(lsttokens, repo):
+    file_author_date = []
     ipage = 1  # url page counter
     ct = 0  # token counter
 
@@ -44,47 +45,48 @@ def countfiles(dictfiles, lsttokens, repo):
                 # For each commit, use the GitHub commit API to extract the files touched by the commit
                 shaUrl = 'https://api.github.com/repos/' + repo + '/commits/' + sha
                 shaDetails, ct = github_auth(shaUrl, lsttokens, ct)
-                filesjson = shaDetails['files']
-                for filenameObj in filesjson:
-                    filename = filenameObj['filename']
-                    dictfiles[filename] = dictfiles.get(filename, 0) + 1
-                    print(filename)
+                if not shaDetails:
+                    break
+                # help from jose
+                for file in shaDetails.get('files', []):
+                    filename = file['filename']
+                    validFile = False
+                    extensions = [".java", ".kt", ".cpp", ".c"]
+                    for extension in extensions:
+                        if filename.endswith(extension):
+                            validFile = True
+                    if validFile:
+                        author = shaObject['commit']['author']['name']
+                        # convert date to datetime object (help from aviendha)
+                        date = shaObject['commit']['author']['date']
+                        # date = datetime.strptime(shaObject['commit']['author']['date'], '%Y-%m-%dT%H:%M:%SZ')
+                        # create entry if it does not already exist
+                        file_author_date.append((filename, author,date))
             ipage += 1
-    except:
+        return file_author_date
+    except Exception as e:
         print("Error receiving data")
+        print(e)
         exit(0)
 # GitHub repo
 repo = 'scottyab/rootbeer'
-# repo = 'Skyscanner/backpack' # This repo is commit heavy. It takes long to finish executing
-# repo = 'k9mail/k-9' # This repo is commit heavy. It takes long to finish executing
-# repo = 'mendhak/gpslogger'
+lstTokens = ["secret :^)"]
 
+file_author_date = count_authorsFileTouches(lstTokens, repo)
+print('Total number of touches: ' + str(len(file_author_date)))
 
-# put your tokens here
-# Remember to empty the list when going to commit to GitHub.
-# Otherwise they will all be reverted and you will have to re-create them
-# I would advise to create more than one token for repos with heavy commits
-lstTokens = ["fake token here for Github"]
-
-dictfiles = dict()
-countfiles(dictfiles, lstTokens, repo)
-print('Total number of files: ' + str(len(dictfiles)))
-
-file = repo.split('/')[1]
+file = "authorsFileTouches"
 # change this to the path of your file
-fileOutput = 'data/file_' + file + '.csv'
-rows = ["Filename", "Touches"]
+fileOutput = '../data/file_' + file + '.csv'
+rows = ["Filename", "Author", "Date"]
 fileCSV = open(fileOutput, 'w')
 writer = csv.writer(fileCSV)
 writer.writerow(rows)
 
 bigcount = None
 bigfilename = None
-for filename, count in dictfiles.items():
-    rows = [filename, count]
+for file, author, date in file_author_date:
+    rows = [file, author, date]
     writer.writerow(rows)
-    if bigcount is None or count > bigcount:
-        bigcount = count
-        bigfilename = filename
 fileCSV.close()
-print('The file ' + bigfilename + ' has been touched ' + str(bigcount) + ' times.')
+print('Authors and touch dates successfully written to ' + fileOutput)

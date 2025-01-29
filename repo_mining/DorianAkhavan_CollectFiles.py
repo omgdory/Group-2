@@ -1,7 +1,7 @@
 import json
 import requests
 import csv
-import subprocess
+
 import os
 
 if not os.path.exists("data"):
@@ -20,10 +20,6 @@ def github_auth(url, lsttoken, ct):
         pass
         print(e)
     return jsonData, ct
-
-# Define source file extensions
-source_file_extensions = [".java", ".kt", ".cpp", ".py"]
-
 
 # @dictFiles, empty dictionary of files
 # @lstTokens, GitHub authentication tokens
@@ -51,23 +47,14 @@ def countfiles(dictfiles, lsttokens, repo):
                 filesjson = shaDetails['files']
                 for filenameObj in filesjson:
                     filename = filenameObj['filename']
-                    # Only process files with specified extensions
-                    if any(filename.endswith(ext) for ext in source_file_extensions):
+                    validFile = False
+                    extensions = [".java", ".kt", ".cpp", ".c"]
+                    for extension in extensions:
+                        if filename.endswith(extension):
+                            validFile = True
+                    if validFile:
                         dictfiles[filename] = dictfiles.get(filename, 0) + 1
                         print(filename)
-
-                        # Collect authors and dates for each file
-                        try:
-                            log_output = subprocess.check_output(
-                                ["git", "log", "--pretty=format:%an %ad", "--", filename],
-                                text=True
-                            )
-                            # Save authors and dates to a file
-                            sanitized_filename = filename.replace("/", "_")
-                            with open(f"data/authors_{sanitized_filename}.txt", 'w') as log_file:
-                                log_file.write(log_output)
-                        except subprocess.CalledProcessError:
-                            print(f"Failed to get log for {filename}")
             ipage += 1
     except:
         print("Error receiving data")
@@ -83,7 +70,7 @@ repo = 'scottyab/rootbeer'
 # Remember to empty the list when going to commit to GitHub.
 # Otherwise they will all be reverted and you will have to re-create them
 # I would advise to create more than one token for repos with heavy commits
-lstTokens = []
+lstTokens = ["secret :^)"]
 
 dictfiles = dict()
 countfiles(dictfiles, lstTokens, repo)
