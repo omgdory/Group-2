@@ -101,6 +101,7 @@ Each test should include:
 # - Ensure `deposit()` correctly increases the account balance.
 # - Verify that depositing a positive amount updates the balance correctly.
 
+
 # ===========================
 # Test: Test Deposit with Zero/Negative Values
 # Author: Ashley Arellano
@@ -137,6 +138,32 @@ def test_deposit_invalid_values(invalid_amount):
 # TODO 7: Test Withdrawal with Insufficient Funds
 # - Ensure `withdraw()` raises an error when attempting to withdraw more than available balance.
 # - Verify that the balance remains unchanged after a failed withdrawal.
+
+# ===========================
+# Test: Withdrawal with Insufficient Funds
+# Author: Franklin La Rosa Diaz
+# Date: 2025-02-02
+# Description: Ensure `withdraw()` prevents withdrawals that exceed available balance.
+# ===========================
+
+def test_withdraw_insufficient_funds():
+    """Test that withdrawing more than the available balance fails and does not change balance."""
+
+    # Create an account with a small balance
+    account = Account(name="Test User", email="testuser@example.com", balance=50.00)
+
+    # Add the account to the session and commit it to the database
+    db.session.add(account)
+    db.session.commit()
+
+   # Attempt to withdraw more than the balance
+    with pytest.raises(DataValidationError, match="Insufficient balance"):
+        account.withdraw(100.0)  ## Trying to withdraw 100.0, which exceeds the balance of 50.0
+
+    # Retrieve the account from the database to ensure the balance hasn't been changed
+    retrieved_account = Account.query.filter_by(email="testuser@example.com").first()
+    # Verify balance remains unchanged
+    assert retrieved_account.balance == 50.0  # Balance should not have changed
 
 # TODO 8: Test Password Hashing
 # - Ensure that passwords are stored as **hashed values**.
