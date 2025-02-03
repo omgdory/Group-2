@@ -96,7 +96,34 @@ Each test should include:
 # TODO 3: Test Missing Required Fields
 # - Ensure that creating an `Account()` without required fields raises an error.
 # - Validate that missing fields trigger the correct exception.
+# ===========================
+# Test: Missing Required Fields in Account()
+# Author: [Abdulrahman Alharbi]
+# Date: [02.02.2025]
+# Description: Ensure that an account cannot be created without required fields.
+# ===========================
 
+import pytest
+from models.account import Account
+from sqlalchemy.exc import IntegrityError
+from models import db
+
+def test_missing_required_fields():
+    """Test that creating an account with missing fields raises an IntegrityError."""
+    
+    # Attempt to create an account with no name
+    with pytest.raises(IntegrityError):
+        account = Account(email="missingname@example.com")
+        db.session.add(account)
+        db.session.commit()
+    db.session.rollback()  # Reset DB state
+
+    # Attempt to create an account with no email
+    with pytest.raises(IntegrityError):
+        account = Account(name="Missing Email")
+        db.session.add(account)
+        db.session.commit()
+    db.session.rollback()  # Reset DB state
 # TODO 4: Test Positive Deposit
 # - Ensure `deposit()` correctly increases the account balance.
 # - Verify that depositing a positive amount updates the balance correctly.
