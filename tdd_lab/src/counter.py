@@ -1,11 +1,14 @@
-from flask import Flask, jsonify
-from . import status  # Notice the dot for relative import
+
 """
 Counter API Implementation
 """
+
+from flask import Flask, jsonify
+from . import status  # Notice the dot for relative import
 from flask import Flask
 
-app = Flask(__name__) 
+app = Flask(__name__)
+
 COUNTERS = {}
 
 def counter_exists(name):
@@ -19,6 +22,14 @@ def create_counter(name):
       return jsonify({"error": f"Counter {name} already exists"}), status.HTTP_409_CONFLICT
   COUNTERS[name] = 0
   return jsonify({name: COUNTERS[name]}), status.HTTP_201_CREATED
+
+@app.route('/counters/<name>', methods=['DELETE'])
+def delete_counter(name):
+  """Delete a counter"""
+  if not counter_exists(name):
+      return jsonify({"error": f"Counter {name} not found"}), status.HTTP_404_NOT_FOUND
+  del COUNTERS[name]
+  return '', status.HTTP_204_NO_CONTENT
 
 # ===========================
 # Feature: Increment Counter (PUT/counter/<name>)
@@ -37,5 +48,4 @@ def increment_counter(name):
   #Counter exists, increment counter and return 200 as HTTP response
   COUNTERS[name] += 1
   return jsonify({name: COUNTERS[name]}),status.HTTP_200_OK
-
 
