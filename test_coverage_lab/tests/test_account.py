@@ -101,9 +101,35 @@ Each test should include:
 # - Ensure `deposit()` correctly increases the account balance.
 # - Verify that depositing a positive amount updates the balance correctly.
 
+
+# ===========================
+# Test: Test Deposit with Zero/Negative Values
+# Author: Ashley Arellano
+# Date: 2025-02-02
+# Description: Ensure `deposit()` raises an error for zero or negative amounts
+# and verify that balance remains unchanged after an invalid deposit attempt
+# ===========================
 # TODO 5: Test Deposit with Zero/Negative Values
-# - Ensure `deposit()` raises an error for zero or negative amounts.
-# - Verify that balance remains unchanged after an invalid deposit attempt.
+@pytest.mark.parametrize("invalid_amount", [0, -10.00])  # Test with both 0 and a negative value
+def test_deposit_invalid_values(invalid_amount):
+    # Creating a generic account to test `deposit()` with invalid values
+    account = Account(name="John Doe", email="johndoe@example.com",balance=0.00)
+    db.session.add(account)
+    db.session.commit()
+    
+    # Setting a negative amount to test with and retrieving account from database
+    retrieved_account = Account.query.filter_by(email="johndoe@example.com").first()
+
+    # Attempt to deposit amount
+    with pytest.raises(DataValidationError, match="Deposit amount must be positive"):
+        retrieved_account.deposit(invalid_amount) #Should raise error if amount is zero or negative
+    # Update account
+    db.session.commit() 
+
+    # Retrieve updated account
+    updated_account = Account.query.filter_by(email="johndoe@example.com").first()
+    # Verify that balance remains unchanged
+    assert retrieved_account.balance == updated_account.balance
 
 # TODO 6: Test Valid Withdrawal
 # - Ensure `withdraw()` correctly decreases the account balance.
@@ -138,7 +164,6 @@ def test_withdraw_insufficient_funds():
     retrieved_account = Account.query.filter_by(email="testuser@example.com").first()
     # Verify balance remains unchanged
     assert retrieved_account.balance == 50.0  # Balance should not have changed
-
 
 # TODO 8: Test Password Hashing
 # - Ensure that passwords are stored as **hashed values**.
