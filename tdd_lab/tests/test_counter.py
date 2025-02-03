@@ -33,8 +33,9 @@ class TestCounterEndpoints:
     # Test: Test Increment Counter (PUT/counter/<name>)
     # Author: Ashley Arellano
     # Date: 2025-02-03
-    # Description: Ensure that `put()` can increment a given, existing 
-    # counter and raises an error when there is an attempt to 
+    # Description: Ensure that when `put()` increments a given, existing 
+    # counter, it produces the correct HTTP response. Otherwise, raises an
+    # error. It also raises an error when there is an attempt to 
     # increment a non-existent counter.
     # ===========================
     def test_increment_counter(self,client):

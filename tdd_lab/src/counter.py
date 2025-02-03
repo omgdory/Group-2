@@ -30,8 +30,11 @@ def create_counter(name):
 # ===========================
 @app.route('/counters/<name>', methods=['PUT'])
 def increment_counter(name):
+  #Checks if the counter to be incremented exists
   if not counter_exists(name):
+    #Counter does not exist, HTTP response is 405
     return jsonify({"error": f"Counter {name} does not exist. Unable to increment."}), status.HTTP_405_METHOD_NOT_ALLOWED
+  #Counter exists, increment counter and return 200 as HTTP response
   COUNTERS[name] += 1
   return jsonify({name: COUNTERS[name]}),status.HTTP_200_OK
 
