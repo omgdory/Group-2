@@ -14,6 +14,7 @@ how to call the web service and assert what it should return.
 import pytest
 from src import app
 from src import status
+from flask import json #for test case 3
 
 @pytest.fixture()
 def client():
@@ -52,4 +53,27 @@ class TestCounterEndpoints:
         #Testing increment counter in NOT ALLOWED case
         result2 = client.put(nameNotExist)
         assert result2.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
+
+    def test_get_existing_counter(self, client):
+        """It should retrieve an existing counter"""
+        
+        # Correct endpoint for creating a counter
+        name = "/counters/test_counter"
+        client.post(name)
+
+        # Now send a GET request to retrieve it
+        response = client.get(name)
+
+        # Ensure the request was successful
+        assert response.status_code == 200
+        
+        # Convert response to JSON only if the request was successful
+        if response.is_json:
+            data = response.get_json()
+        else:
+            pytest.fail(f"Expected JSON response but got: {response.data}")
+
+        # Assertions
+        assert "test_counter" in data
+       
 
