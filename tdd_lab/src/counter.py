@@ -1,5 +1,3 @@
-from flask import Flask, jsonify
-from . import status  # Notice the dot for relative import
 """
 Counter API Implementation
 """
@@ -23,13 +21,6 @@ def create_counter(name):
   COUNTERS[name] = 0
   return jsonify({name: COUNTERS[name]}), status.HTTP_201_CREATED
 
-
-@app.route('/counters/<name>', methods=['GET'])
-def get_counter(name):
-    """Retrieve an existing counter"""
-    if name in COUNTERS:
-        return jsonify({name: COUNTERS[name]}), 200
-    return jsonify({"error": "Counter not found"}), 404
 
 @app.route('/counters/<name>', methods=['DELETE'])
 def delete_counter(name):
