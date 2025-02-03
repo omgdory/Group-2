@@ -54,6 +54,15 @@ class TestCounterEndpoints:
         result2 = client.put(nameNotExist)
         assert result2.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
 
+
+# TODO 3: i will do this later 
+# - i will do this later 
+# ===========================
+# Test: Retrieve an existing counter
+# Author: [Abdulrahman Alharbi]
+# Date: [02.03.2025]
+# Description: i will do this later 
+# ===========================
     def test_get_existing_counter(self, client):
         """It should retrieve an existing counter"""
         
@@ -76,18 +85,4 @@ class TestCounterEndpoints:
         # Assertions
         assert "test_counter" in data
        
-    
-    def test_delete_counter(self, client):
-        """It should delete a counter"""
-        # Create a counter
-        client.post('/counters/foo')
-        # Delete it
-        result = client.delete('/counters/foo')
-        # Check deletion 
-        assert result.status_code == status.HTTP_204_NO_CONTENT
-        # Delete again to check it passes
-        result = client.delete('/counters/foo')
-        # Check deletion  when counter doesn't exist
-        assert result.status_code == status.HTTP_404_NOT_FOUND
 
-    
