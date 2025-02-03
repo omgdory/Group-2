@@ -54,3 +54,12 @@ def get_counter(name):
         return jsonify({name: COUNTERS[name]}), 200
     return jsonify({"error": "Counter not found"}), 404
 
+
+
+@app.route('/counters/<name>', methods=['DELETE'])
+def delete_counter(name):
+  """Delete a counter"""
+  if not counter_exists(name):
+      return jsonify({"error": f"Counter {name} not found"}), status.HTTP_404_NOT_FOUND
+  del COUNTERS[name]
+  return '', status.HTTP_204_NO_CONTENT
