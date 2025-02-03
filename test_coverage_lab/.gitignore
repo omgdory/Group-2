@@ -1,3 +1,8 @@
+
+.coverage
+instance/test.db
+tests/test_account.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -169,3 +174,4 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
