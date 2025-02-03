@@ -10,3 +10,45 @@ how to call the web service and assert what it should return.
 - The service must be able to update a counter by name.
 - The service must be able to read the counter
 """
+
+import pytest
+from src import app
+from src import status
+
+@pytest.fixture()
+def client():
+    """Fixture for Flask test client"""
+    return app.test_client()
+
+@pytest.mark.usefixtures("client")
+class TestCounterEndpoints:
+    """Test cases for Counter API"""
+
+    def test_create_counter(self, client):
+        """It should create a counter"""
+        result = client.post('/counters/foo')
+        assert result.status_code == status.HTTP_201_CREATED
+
+    # ===========================
+    # Test: Test Increment Counter (PUT/counter/<name>)
+    # Author: Ashley Arellano
+    # Date: 2025-02-03
+    # Description: Ensure that `put()` can increment a given, existing 
+    # counter and raises an error when there is an attempt to 
+    # increment a non-existent counter.
+    # ===========================
+    def test_increment_counter(self,client):
+        #Test case 5 when there EXISTS a counter able to be incremented
+        name = '/counters/test_case_5_allowed'
+        #Create counter 
+        client.post(name)
+        #Testing increment counter in ALLOWED case
+        result = client.put(name)
+        assert result.status_code == status.HTTP_200_OK
+
+        #Test case 5 when there is a NO counter able to be incremented
+        nameNotExist = '/counters/test_case_5_not_allowed'
+        #Testing increment counter in NOT ALLOWED case
+        result2 = client.put(nameNotExist)
+        assert result2.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
+
