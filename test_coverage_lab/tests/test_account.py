@@ -6,6 +6,7 @@ from random import randrange
 import pytest
 from models import db
 from models.account import Account, DataValidationError
+import random
 
 ACCOUNT_DATA = {}
 
@@ -124,9 +125,29 @@ def test_missing_required_fields():
         db.session.add(account)
         db.session.commit()
     db.session.rollback()  # Reset DB state
+
 # TODO 4: Test Positive Deposit
-# - Ensure `deposit()` correctly increases the account balance.
-# - Verify that depositing a positive amount updates the balance correctly.
+# ===========================
+# Test: Test Positive Deposit
+# Author: Aviendha Andrus
+# Date: 2025-02-3
+# Description: Ensure `deposit()` correctly increases account balance
+# and verifies that depositing a positive amount updates balance correctly.
+# ===========================
+def test_positive_deposit():
+   """Test that depositing a positive amount increases the balance"""
+
+   # create new account with existing balance
+   account = Account(name="John Doe", email="johndoe@example.com",balance=0.00)
+   db.session.add(account)
+   db.session.commit()
+
+   old_balance = account.balance
+   deposit_amount = random.randint(1, 101)
+   account.deposit(deposit_amount)
+  
+   # testing line 55 of account.py 'self.balance += amount'
+   assert account.balance == old_balance + deposit_amount
 
 
 # ===========================
