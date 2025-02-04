@@ -223,8 +223,38 @@ def test_withdraw_insufficient_funds():
 # - Verify that the updated role is stored in the database.
 
 # TODO 10: Test Invalid Role Assignment
-# - Ensure that assigning an invalid role raises an appropriate error.
-# - Verify that only allowed roles (`admin`, `user`, etc.) can be set.
+# ===========================
+# Test: Test invalid role assignment
+# Author: Christopher Liscano
+# Date: 2025-02-3
+# Description: Ensure that assigning an invalid role raises an appropriate error.
+#              Verify that only allowed roles (`admin`, `user`, etc.) can be set.
+# ===========================
+def test_invalid_role_assignment():
+    # create an account with valid role
+    account = Account(name="John Doe", email="johndoe@example.com", role="admin")
+    db.session.add(account)
+    db.session.commit()
+
+    # showing that attempting an invalid role causes an error
+    invalid_roles = ["Chris", "guest", "test", "", None, ":>", "idk"]
+    for invalid_role in invalid_roles:
+        with pytest.raises(DataValidationError, match="Invalid role"):
+            account.change_role(invalid_role)
+
+    # get account from database
+    get_account = Account.query.filter_by(email="johndoe@example.com").first()
+
+    # check if role is unchanged
+    assert get_account.role == "admin"
+
+    # verifying that only allowed roles can be set
+    account.change_role("admin")
+    db.session.commit()
+
+    # check if change was successful
+    check_account = Account.query.filter_by(email="johndoe@example.com").first()
+    assert check_account.role == "admin"
 
 # TODO 11: Test Deleting an Account
 # - Ensure that `delete()` removes an account from the database.
