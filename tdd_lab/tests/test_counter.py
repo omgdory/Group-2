@@ -67,3 +67,29 @@ class TestCounterEndpoints:
         # Check deletion  when counter doesn't exist
         assert result.status_code == status.HTTP_404_NOT_FOUND
 
+    # TODO 3: i will do this later 
+    # - i will do this later 
+    # ===========================
+    # Test: Retrieve an existing counter
+    # Author: [Abdulrahman Alharbi]
+    # Date: [02.03.2025]
+    # Description: i will do this later 
+    # ===========================
+    def test_get_existing_counter(self, client):
+        """It should retrieve an existing counter"""
+        
+        # Correct endpoint for creating a counter
+        name = "/counters/test_counter"
+        client.post(name)
+        # Now send a GET request to retrieve it
+        response = client.get(name)
+        # Ensure the request was successful
+        assert response.status_code == 200
+        
+        # Convert response to JSON only if the request was successful
+        if response.is_json:
+            data = response.get_json()
+        else:
+            pytest.fail(f"Expected JSON response but got: {response.data}")
+        # Assertions
+        assert "test_counter" in data
