@@ -2,6 +2,7 @@
 Test Cases for Account Model
 """
 import json
+import random
 from random import randrange
 import pytest
 from models import db
@@ -131,9 +132,27 @@ def test_deposit_invalid_values(invalid_amount):
     # Verify that balance remains unchanged
     assert retrieved_account.balance == updated_account.balance
 
-# TODO 6: Test Valid Withdrawal
+
+# ===========================
+# Test: Test Valid Withdrawal
+# Author: Charles Joseph (CJ) Ballesteros
+# Date: 2025-02-02
+# Description:
 # - Ensure `withdraw()` correctly decreases the account balance.
 # - Verify that withdrawals within available balance succeed.
+# ===========================
+# TODO 6: Test Valid Withdrawal
+@pytest.mark.parametrize("invalid_amount", [0.00, 100.00])  # Test with both 0 and a negative value
+def test_valid_withdraw(invalid_amount):
+    account = Account(name="Yukino Sakimuri", email="YukinoSakimuri@gmail.com", balance=101.00)
+    db.session.add(account)
+    db.session.commit()
+
+    old_balance = account.balance
+    withdraw_amount = random.randint(0, 100)
+    account.withdraw(withdraw_amount)
+
+    assert account.balance == old_balance - withdraw_amount
 
 # TODO 7: Test Withdrawal with Insufficient Funds
 # - Ensure `withdraw()` raises an error when attempting to withdraw more than available balance.
