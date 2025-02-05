@@ -30,6 +30,27 @@ class TestCounterEndpoints:
         result = client.post('/counters/foo')
         assert result.status_code == status.HTTP_201_CREATED
 
+    # ===========================  
+    # Test: Delete Counter (DELETE /counters/<name>)  
+    # Author: Franklin La Rosa Diaz  
+    # Date: 2025-02-02  
+    # Description: Ensure that when `delete()` removes an existing counter,  
+    # it produces the correct HTTP response. Otherwise, it raises an error.  
+    # It also raises an error when there is an attempt to delete a non-existent counter.  
+    # =========================== 
+    def test_delete_counter(self, client):
+        """It should delete a counter"""
+        # Create a counter
+        client.post('/counters/foo')
+        # Delete it
+        result = client.delete('/counters/foo')
+        # Check deletion 
+        assert result.status_code == status.HTTP_204_NO_CONTENT
+        # Delete again to check it passes
+        result = client.delete('/counters/foo')
+        # Check deletion  when counter doesn't exist
+        assert result.status_code == status.HTTP_404_NOT_FOUND
+
     """
     Name: Jose Alarcon, NSHE: 5005581810, CS472 GitHub Lab
     Description: This file gathers git commits on a specific project.
@@ -73,18 +94,6 @@ class TestCounterEndpoints:
         result = client.put(name)
         assert result.status_code == status.HTTP_404_NOT_FOUND
 
-    def test_delete_counter(self, client):
-        """It should delete a counter"""
-        # Create a counter
-        client.post('/counters/foo')
-        # Delete it
-        result = client.delete('/counters/foo')
-        # Check deletion 
-        assert result.status_code == status.HTTP_204_NO_CONTENT
-        # Delete again to check it passes
-        result = client.delete('/counters/foo')
-        # Check deletion  when counter doesn't exist
-        assert result.status_code == status.HTTP_404_NOT_FOUND
 
     # TODO 3: i will do this later 
     # - i will do this later 
