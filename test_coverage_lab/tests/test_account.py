@@ -7,7 +7,6 @@ from random import randrange
 import pytest
 from models import db
 from models.account import Account, DataValidationError
-import random
 
 ACCOUNT_DATA = {}
 
@@ -94,6 +93,20 @@ Each test should include:
 # TODO 2: Test Invalid Email Input
 # - Check that invalid emails (e.g., "not-an-email") raise a validation error.
 # - Ensure accounts without an email cannot be created.
+# ===========================
+# Test: Invalid Email Input
+# Author: Dorian Akhavan
+# Date: 2025-02-04
+# Description: Ensure accounts without an email cannot be created.
+# ===========================
+
+def test_invalid_email_input():
+    """Test Invalid Email Input"""
+    account = Account(name="John Doe", email="thisisaninvalidemail", role="user")
+
+    # Attempt to assign an invalid email
+    with pytest.raises(DataValidationError):
+        account.validate_email()  # Invalid email should raise an error
 
 # TODO 3: Test Missing Required Fields
 # - Ensure that creating an `Account()` without required fields raises an error.
@@ -243,6 +256,8 @@ def test_withdraw_insufficient_funds():
 # - Verify that the updated role is stored in the database.
 
 # TODO 10: Test Invalid Role Assignment
+# - Ensure that assigning an invalid role raises an appropriate error.
+# - Verify that only allowed roles (`admin`, `user`, etc.) can be set.
 # ===========================
 # Test: Test invalid role assignment
 # Author: Christopher Liscano
