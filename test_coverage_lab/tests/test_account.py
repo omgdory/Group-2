@@ -2,6 +2,7 @@
 Test Cases for Account Model
 """
 import json
+import random
 from random import randrange
 import pytest
 from models import db
@@ -88,20 +89,71 @@ Each test should include:
 # TODO 1: Test Account Serialization
 # - Ensure `to_dict()` correctly converts an account to a dictionary format.
 # - Verify that all expected fields are included in the dictionary.
+# ===========================
+# Test: Account Serialization
+# Author: Dorian Akhavan
+# Date: 2025-02-04
+# Description: Ensure account can be serialized.
+# ===========================
+
+def test_account_serialization():
+    """Test assigning roles to an account"""
+    account = Account(name="Dorian Akhavan", email="dorian@cs472.com", role="user")
+
+    # serialize
+    test_dict = account.to_dict()
+
+    # ensure that serialization worked (check every value)
+    assert test_dict["id"] == account.id
+    assert test_dict["name"] == account.name
+    assert test_dict["email"] == account.email
+    assert test_dict["phone_number"] == account.phone_number
+    assert test_dict["disabled"] == account.disabled
+    assert test_dict["date_joined"] == account.date_joined
+    assert test_dict["balance"] == account.balance
+    assert test_dict["role"] == account.role
 
 # TODO 2: Test Invalid Email Input
 # - Check that invalid emails (e.g., "not-an-email") raise a validation error.
 # - Ensure accounts without an email cannot be created.
 
+# ===========================
+# Test: Test Invalid Email Input
+# Author: Jose Alarcon
+# Date: 2025-02-02
+# Description: Ensure accounts without an email cannot be created.
+# ===========================
+@pytest.mark.parametrize("invalid_email", [
+    "email",
+    "@usernamemissing.com",
+    "no_at.com",
+    "username@.com",
+    "username@com",
+    "not-an-email"
+])
+
+def test_invalid_email(invalid_email):
+    account = Account(name="Test User", email=invalid_email)  # account with invalid email
+
+    with pytest.raises(DataValidationError, match="Invalid email format"):
+        account.validate_email()  # raise an exception
+
+def test_missing_email():
+    with pytest.raises(TypeError):
+        account = Account(name="Test User", email=None)  # pass None
+        account.validate_email()  # raise TypeError (None != string)
+
 # TODO 3: Test Missing Required Fields
 # - Ensure that creating an `Account()` without required fields raises an error.
 # - Validate that missing fields trigger the correct exception.
+
 # ===========================
 # Test: Missing Required Fields in Account()
 # Author: [Abdulrahman Alharbi]
 # Date: [02.02.2025]
 # Description: Ensure that an account cannot be created without required fields.
 # ===========================
+
 
 import pytest
 from models.account import Account
@@ -124,9 +176,29 @@ def test_missing_required_fields():
         db.session.add(account)
         db.session.commit()
     db.session.rollback()  # Reset DB state
+
 # TODO 4: Test Positive Deposit
-# - Ensure `deposit()` correctly increases the account balance.
-# - Verify that depositing a positive amount updates the balance correctly.
+# ===========================
+# Test: Test Positive Deposit
+# Author: Aviendha Andrus
+# Date: 2025-02-3
+# Description: Ensure `deposit()` correctly increases account balance
+# and verifies that depositing a positive amount updates balance correctly.
+# ===========================
+def test_positive_deposit():
+   """Test that depositing a positive amount increases the balance"""
+
+   # create new account with existing balance
+   account = Account(name="John Doe", email="johndoe@example.com",balance=0.00)
+   db.session.add(account)
+   db.session.commit()
+
+   old_balance = account.balance
+   deposit_amount = random.randint(1, 101)
+   account.deposit(deposit_amount)
+  
+   # testing line 55 of account.py 'self.balance += amount'
+   assert account.balance == old_balance + deposit_amount
 
 
 # ===========================
@@ -158,9 +230,27 @@ def test_deposit_invalid_values(invalid_amount):
     # Verify that balance remains unchanged
     assert retrieved_account.balance == updated_account.balance
 
-# TODO 6: Test Valid Withdrawal
+
+# ===========================
+# Test: Test Valid Withdrawal
+# Author: Charles Joseph (CJ) Ballesteros
+# Date: 2025-02-02
+# Description:
 # - Ensure `withdraw()` correctly decreases the account balance.
 # - Verify that withdrawals within available balance succeed.
+# ===========================
+# TODO 6: Test Valid Withdrawal
+@pytest.mark.parametrize("invalid_amount", [0.00, 100.00])  # Test with both 0 and a negative value
+def test_valid_withdraw(invalid_amount):
+    account = Account(name="Yukino Sakimuri", email="YukinoSakimuri@gmail.com", balance=101.00)
+    db.session.add(account)
+    db.session.commit()
+
+    old_balance = account.balance
+    withdraw_amount = random.randint(0, 100)
+    account.withdraw(withdraw_amount)
+
+    assert account.balance == old_balance - withdraw_amount
 
 # TODO 7: Test Withdrawal with Insufficient Funds
 # - Ensure `withdraw()` raises an error when attempting to withdraw more than available balance.
@@ -204,6 +294,39 @@ def test_withdraw_insufficient_funds():
 # TODO 10: Test Invalid Role Assignment
 # - Ensure that assigning an invalid role raises an appropriate error.
 # - Verify that only allowed roles (`admin`, `user`, etc.) can be set.
+
+# ===========================
+# Test: Test invalid role assignment
+# Author: Christopher Liscano
+# Date: 2025-02-3
+# Description: Ensure that assigning an invalid role raises an appropriate error.
+#              Verify that only allowed roles (`admin`, `user`, etc.) can be set.
+# ===========================
+def test_invalid_role_assignment():
+    # create an account with valid role
+    account = Account(name="John Doe", email="johndoe@example.com", role="admin")
+    db.session.add(account)
+    db.session.commit()
+
+    # showing that attempting an invalid role causes an error
+    invalid_roles = ["Chris", "guest", "test", "", None, ":>", "idk"]
+    for invalid_role in invalid_roles:
+        with pytest.raises(DataValidationError, match="Invalid role"):
+            account.change_role(invalid_role)
+
+    # get account from database
+    get_account = Account.query.filter_by(email="johndoe@example.com").first()
+
+    # check if role is unchanged
+    assert get_account.role == "admin"
+
+    # verifying that only allowed roles can be set
+    account.change_role("admin")
+    db.session.commit()
+
+    # check if change was successful
+    check_account = Account.query.filter_by(email="johndoe@example.com").first()
+    assert check_account.role == "admin"
 
 # TODO 11: Test Deleting an Account
 # - Ensure that `delete()` removes an account from the database.
