@@ -16,6 +16,14 @@ from src import app
 from src import status
 from flask import json #for test case 3
 
+@pytest.fixture(autouse=True) # ensures that test 10 starts with a clean slate every time
+def reset_counters():
+    """Reset counters before each test"""
+    from src.counter import COUNTERS
+    COUNTERS.clear()
+    yield
+    COUNTERS.clear()
+
 @pytest.fixture()
 def client():
     """Fixture for Flask test client"""
@@ -122,3 +130,25 @@ class TestCounterEndpoints:
         # Assertions
         assert "test_counter" in data
 
+    # ===========================
+    # Test: Lists all the counters
+    # Author: Christopher Liscano
+    # Date: 2025-02-04
+    # Description: Should output all the counters
+    # ===========================
+    def test_list_counters(self, client):
+        """It should list all counters"""
+        # create some test counters
+        client.post('/counters/foo')
+        client.post('/counters/bar')
+        # get list of counters
+        result = client.get('/counters')
+        # check response
+        assert result.status_code == status.HTTP_200_OK
+        data = result.get_json()
+        assert isinstance(data, dict)
+        assert len(data) == 2
+        assert 'foo' in data
+        assert 'bar' in data
+        assert data['foo'] == 0
+        assert data['bar'] == 0

@@ -72,3 +72,14 @@ def get_counter(name):
     if name in COUNTERS:
         return jsonify({name: COUNTERS[name]}), 200
     return jsonify({"error": "Counter not found"}), 404
+
+# ===========================
+# Feature: List all counters
+# Author: Christopher Liscano
+# Date: 2025-02-04
+# Description: GET endpoint to retrieve all counter names and their current values
+# ===========================
+@app.route('/counters', methods=['GET'])
+def list_counters():
+    """List all counters"""
+    return jsonify(COUNTERS), status.HTTP_200_OK
