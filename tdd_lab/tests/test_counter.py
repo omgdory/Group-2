@@ -10,3 +10,33 @@ how to call the web service and assert what it should return.
 - The service must be able to update a counter by name.
 - The service must be able to read the counter
 """
+
+import pytest
+from src import app
+from src import status
+from flask import json #for test case 3
+
+@pytest.fixture()
+def client():
+    """Fixture for Flask test client"""
+    return app.test_client()
+
+@pytest.mark.usefixtures("client")
+class TestCounterEndpoints:
+    """Test cases for Counter API"""
+
+    def test_create_counter(self, client):
+        """It should create a counter"""
+        result = client.post('/counters/foo')
+        assert result.status_code == status.HTTP_201_CREATED
+    
+    # ===========================
+    # Feature: Create a new counter (POST /counters/<name>)
+    # Author: Dorian Akhavan
+    # Date: 2025-02-04
+    # Description: Create a counter and check that the status indicates creation
+    # ===========================
+    def test_create_new_counter(self, client):
+        """It should create a counter"""
+        result = client.post('/counters/foo')
+        assert result.status_code == status.HTTP_201_CREATED
