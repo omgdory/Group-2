@@ -95,12 +95,18 @@ class TestCounterEndpoints:
         result = client.put(name)
         assert result.status_code == status.HTTP_200_OK
 
-        #Test case 5 when there is a NO counter able to be incremented
-        nameNotExist = '/counters/test_case_5_not_allowed'
-        #Testing increment counter in NOT ALLOWED case
-        result2 = client.put(nameNotExist)
-        assert result2.status_code == status.HTTP_405_METHOD_NOT_ALLOWED
-    
+    # ===========================
+    # Test: Prevent updating non-existent counter (PUT/counter/<name>)
+    # Author: Charles Joseph Ballesteros
+    # Date: 2025-02-03
+    # Description: Asserts that the counter does not increment if the counter
+    # doesn't exist.
+    # ===========================
+    def test_nonexistent_counter(self, client):
+        name = 'counters/test_case_6_non_existent'
+        result = client.put(name)
+        assert result.status_code == status.HTTP_404_NOT_FOUND
+
     def test_delete_counter(self, client):
         """It should delete a counter"""
         # Create a counter
