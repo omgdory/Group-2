@@ -2,6 +2,7 @@
 Test Cases for Account Model
 """
 import json
+import random
 from random import randrange
 import pytest
 from models import db
@@ -110,22 +111,140 @@ def test_invalid_email_input():
 # TODO 3: Test Missing Required Fields
 # - Ensure that creating an `Account()` without required fields raises an error.
 # - Validate that missing fields trigger the correct exception.
+# ===========================
+# Test: Missing Required Fields in Account()
+# Author: [Abdulrahman Alharbi]
+# Date: [02.02.2025]
+# Description: Ensure that an account cannot be created without required fields.
+# ===========================
+
+
+import pytest
+from models.account import Account
+from sqlalchemy.exc import IntegrityError
+from models import db
+
+def test_missing_required_fields():
+    """Test that creating an account with missing fields raises an IntegrityError."""
+    
+    # Attempt to create an account with no name
+    with pytest.raises(IntegrityError):
+        account = Account(email="missingname@example.com")
+        db.session.add(account)
+        db.session.commit()
+    db.session.rollback()  # Reset DB state
+
+    # Attempt to create an account with no email
+    with pytest.raises(IntegrityError):
+        account = Account(name="Missing Email")
+        db.session.add(account)
+        db.session.commit()
+    db.session.rollback()  # Reset DB state
 
 # TODO 4: Test Positive Deposit
-# - Ensure `deposit()` correctly increases the account balance.
-# - Verify that depositing a positive amount updates the balance correctly.
+# ===========================
+# Test: Test Positive Deposit
+# Author: Aviendha Andrus
+# Date: 2025-02-3
+# Description: Ensure `deposit()` correctly increases account balance
+# and verifies that depositing a positive amount updates balance correctly.
+# ===========================
+def test_positive_deposit():
+   """Test that depositing a positive amount increases the balance"""
 
+   # create new account with existing balance
+   account = Account(name="John Doe", email="johndoe@example.com",balance=0.00)
+   db.session.add(account)
+   db.session.commit()
+
+   old_balance = account.balance
+   deposit_amount = random.randint(1, 101)
+   account.deposit(deposit_amount)
+  
+   # testing line 55 of account.py 'self.balance += amount'
+   assert account.balance == old_balance + deposit_amount
+
+
+# ===========================
+# Test: Test Deposit with Zero/Negative Values
+# Author: Ashley Arellano
+# Date: 2025-02-02
+# Description: Ensure `deposit()` raises an error for zero or negative amounts
+# and verify that balance remains unchanged after an invalid deposit attempt
+# ===========================
 # TODO 5: Test Deposit with Zero/Negative Values
-# - Ensure `deposit()` raises an error for zero or negative amounts.
-# - Verify that balance remains unchanged after an invalid deposit attempt.
+@pytest.mark.parametrize("invalid_amount", [0, -10.00])  # Test with both 0 and a negative value
+def test_deposit_invalid_values(invalid_amount):
+    # Creating a generic account to test `deposit()` with invalid values
+    account = Account(name="John Doe", email="johndoe@example.com",balance=0.00)
+    db.session.add(account)
+    db.session.commit()
+    
+    # Setting a negative amount to test with and retrieving account from database
+    retrieved_account = Account.query.filter_by(email="johndoe@example.com").first()
 
-# TODO 6: Test Valid Withdrawal
+    # Attempt to deposit amount
+    with pytest.raises(DataValidationError, match="Deposit amount must be positive"):
+        retrieved_account.deposit(invalid_amount) #Should raise error if amount is zero or negative
+    # Update account
+    db.session.commit() 
+
+    # Retrieve updated account
+    updated_account = Account.query.filter_by(email="johndoe@example.com").first()
+    # Verify that balance remains unchanged
+    assert retrieved_account.balance == updated_account.balance
+
+
+# ===========================
+# Test: Test Valid Withdrawal
+# Author: Charles Joseph (CJ) Ballesteros
+# Date: 2025-02-02
+# Description:
 # - Ensure `withdraw()` correctly decreases the account balance.
 # - Verify that withdrawals within available balance succeed.
+# ===========================
+# TODO 6: Test Valid Withdrawal
+@pytest.mark.parametrize("invalid_amount", [0.00, 100.00])  # Test with both 0 and a negative value
+def test_valid_withdraw(invalid_amount):
+    account = Account(name="Yukino Sakimuri", email="YukinoSakimuri@gmail.com", balance=101.00)
+    db.session.add(account)
+    db.session.commit()
+
+    old_balance = account.balance
+    withdraw_amount = random.randint(0, 100)
+    account.withdraw(withdraw_amount)
+
+    assert account.balance == old_balance - withdraw_amount
 
 # TODO 7: Test Withdrawal with Insufficient Funds
 # - Ensure `withdraw()` raises an error when attempting to withdraw more than available balance.
 # - Verify that the balance remains unchanged after a failed withdrawal.
+
+# ===========================
+# Test: Withdrawal with Insufficient Funds
+# Author: Franklin La Rosa Diaz
+# Date: 2025-02-02
+# Description: Ensure `withdraw()` prevents withdrawals that exceed available balance.
+# ===========================
+
+def test_withdraw_insufficient_funds():
+    """Test that withdrawing more than the available balance fails and does not change balance."""
+
+    # Create an account with a small balance
+    account = Account(name="Test User", email="testuser@example.com", balance=50.00)
+
+    # Add the account to the session and commit it to the database
+    db.session.add(account)
+    db.session.commit()
+
+   # Attempt to withdraw more than the balance
+    with pytest.raises(DataValidationError, match="Insufficient balance"):
+        account.withdraw(100.0)  ## Trying to withdraw 100.0, which exceeds the balance of 50.0
+
+    # Retrieve the account from the database to ensure the balance hasn't been changed
+    retrieved_account = Account.query.filter_by(email="testuser@example.com").first()
+    # Verify balance remains unchanged
+    assert retrieved_account.balance == 50.0  # Balance should not have changed
 
 # TODO 8: Test Password Hashing
 # - Ensure that passwords are stored as **hashed values**.
@@ -139,6 +258,38 @@ def test_invalid_email_input():
 # TODO 10: Test Invalid Role Assignment
 # - Ensure that assigning an invalid role raises an appropriate error.
 # - Verify that only allowed roles (`admin`, `user`, etc.) can be set.
+# ===========================
+# Test: Test invalid role assignment
+# Author: Christopher Liscano
+# Date: 2025-02-3
+# Description: Ensure that assigning an invalid role raises an appropriate error.
+#              Verify that only allowed roles (`admin`, `user`, etc.) can be set.
+# ===========================
+def test_invalid_role_assignment():
+    # create an account with valid role
+    account = Account(name="John Doe", email="johndoe@example.com", role="admin")
+    db.session.add(account)
+    db.session.commit()
+
+    # showing that attempting an invalid role causes an error
+    invalid_roles = ["Chris", "guest", "test", "", None, ":>", "idk"]
+    for invalid_role in invalid_roles:
+        with pytest.raises(DataValidationError, match="Invalid role"):
+            account.change_role(invalid_role)
+
+    # get account from database
+    get_account = Account.query.filter_by(email="johndoe@example.com").first()
+
+    # check if role is unchanged
+    assert get_account.role == "admin"
+
+    # verifying that only allowed roles can be set
+    account.change_role("admin")
+    db.session.commit()
+
+    # check if change was successful
+    check_account = Account.query.filter_by(email="johndoe@example.com").first()
+    assert check_account.role == "admin"
 
 # TODO 11: Test Deleting an Account
 # - Ensure that `delete()` removes an account from the database.
