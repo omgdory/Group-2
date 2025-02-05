@@ -93,24 +93,37 @@ Each test should include:
 # TODO 2: Test Invalid Email Input
 # - Check that invalid emails (e.g., "not-an-email") raise a validation error.
 # - Ensure accounts without an email cannot be created.
+
 # ===========================
-# Test: Invalid Email Input
-# Author: Dorian Akhavan
-# Date: 2025-02-04
+# Test: Test Invalid Email Input
+# Author: Jose Alarcon
+# Date: 2025-02-02
 # Description: Ensure accounts without an email cannot be created.
 # ===========================
+@pytest.mark.parametrize("invalid_email", [
+    "email",
+    "@usernamemissing.com",
+    "no_at.com",
+    "username@.com",
+    "username@com",
+    "not-an-email"
+])
 
-def test_invalid_email_input():
-    """Test Invalid Email Input"""
-    account = Account(name="John Doe", email="thisisaninvalidemail", role="user")
+def test_invalid_email(invalid_email):
+    account = Account(name="Test User", email=invalid_email)  # account with invalid email
 
-    # Attempt to assign an invalid email
-    with pytest.raises(DataValidationError):
-        account.validate_email()  # Invalid email should raise an error
+    with pytest.raises(DataValidationError, match="Invalid email format"):
+        account.validate_email()  # raise an exception
+
+def test_missing_email():
+    with pytest.raises(TypeError):
+        account = Account(name="Test User", email=None)  # pass None
+        account.validate_email()  # raise TypeError (None != string)
 
 # TODO 3: Test Missing Required Fields
 # - Ensure that creating an `Account()` without required fields raises an error.
 # - Validate that missing fields trigger the correct exception.
+
 # ===========================
 # Test: Missing Required Fields in Account()
 # Author: [Abdulrahman Alharbi]
@@ -258,6 +271,7 @@ def test_withdraw_insufficient_funds():
 # TODO 10: Test Invalid Role Assignment
 # - Ensure that assigning an invalid role raises an appropriate error.
 # - Verify that only allowed roles (`admin`, `user`, etc.) can be set.
+
 # ===========================
 # Test: Test invalid role assignment
 # Author: Christopher Liscano
