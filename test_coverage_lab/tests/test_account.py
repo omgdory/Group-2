@@ -105,7 +105,7 @@ def test_invalid_email_input():
 
     # Attempt to assign an invalid email
     with pytest.raises(DataValidationError):
-        account.validate_email("moderator")  # Invalid email should raise an error
+        account.validate_email()  # Invalid email should raise an error
 
 # TODO 3: Test Missing Required Fields
 # - Ensure that creating an `Account()` without required fields raises an error.
