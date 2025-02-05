@@ -16,6 +16,14 @@ class TestCounterEndpoints:
         result = client.post('/counters/foo')
         assert result.status_code == status.HTTP_201_CREATED
     
+# ===========================  
+# Test: Delete Counter (DELETE /counters/<name>)  
+# Author: Franklin La Rosa Diaz  
+# Date: 2025-02-02  
+# Description: Ensure that when `delete()` removes an existing counter,  
+# it produces the correct HTTP response. Otherwise, it raises an error.  
+# It also raises an error when there is an attempt to delete a non-existent counter.  
+# =========================== 
     def test_delete_counter(self, client):
         """It should delete a counter"""
         # Create a counter
