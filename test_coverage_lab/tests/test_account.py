@@ -88,6 +88,29 @@ Each test should include:
 # TODO 1: Test Account Serialization
 # - Ensure `to_dict()` correctly converts an account to a dictionary format.
 # - Verify that all expected fields are included in the dictionary.
+# ===========================
+# Test: Account Serialization
+# Author: Dorian Akhavan
+# Date: 2025-02-04
+# Description: Ensure account can be serialized.
+# ===========================
+
+def test_account_serialization():
+    """Test assigning roles to an account"""
+    account = Account(name="Dorian Akhavan", email="dorian@cs472.com", role="user")
+
+    # serialize
+    test_dict = account.to_dict()
+
+    # ensure that serialization worked (check every value)
+    assert test_dict["id"] == account.id
+    assert test_dict["name"] == account.name
+    assert test_dict["email"] == account.email
+    assert test_dict["phone_number"] == account.phone_number
+    assert test_dict["disabled"] == account.disabled
+    assert test_dict["date_joined"] == account.date_joined
+    assert test_dict["balance"] == account.balance
+    assert test_dict["role"] == account.role
 
 # TODO 2: Test Invalid Email Input
 # - Check that invalid emails (e.g., "not-an-email") raise a validation error.
