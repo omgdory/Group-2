@@ -82,3 +82,4 @@ def get_counter(name):
 @app.route('/counters', methods=['GET'])
 def list_counters():
     """List all counters"""
+    return jsonify(COUNTERS), status.HTTP_200_OK
