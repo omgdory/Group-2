@@ -1,109 +1,104 @@
 import json
 import requests
 import csv
-import subprocess
 import os
 
+# ------------ User-defined PART: define what you consider “source file”. -------------
+# Example approach: we only collect files if they end with .java or .kt for an Android/Java/Kotlin repo.
+# You can expand or change this list as needed for the repo you’re analyzing.
+SOURCE_FILE_EXTENSIONS = {".java", ".kt", ".py", ".cpp", ".h", ".c"}
+
+# ------------------------------------------------------------------------------------
+
 if not os.path.exists("data"):
- os.makedirs("data")
+    os.makedirs("data")
 
 # GitHub Authentication function
-def github_auth(url, lsttoken, ct):
+def github_auth(url, lst_tokens, ct):
     jsonData = None
     try:
-        ct = ct % len(lstTokens)
-        headers = {'Authorization': 'Bearer {}'.format(lsttoken[ct])}
+        # cycle through the list of tokens (to avoid rate-limits if multiple tokens exist)
+        ct = ct % len(lst_tokens)
+        headers = {'Authorization': f'Bearer {lst_tokens[ct]}'}
         request = requests.get(url, headers=headers)
-        jsonData = json.loads(request.content)
+        request.raise_for_status()
+        jsonData = request.json()
         ct += 1
     except Exception as e:
-        pass
-        print(e)
+        print(f"Error in request: {e}")
     return jsonData, ct
 
-# Define source file extensions
-source_file_extensions = [".java", ".kt", ".cpp", ".py"]
-
-
-# @dictFiles, empty dictionary of files
-# @lstTokens, GitHub authentication tokens
-# @repo, GitHub repo
-def countfiles(dictfiles, lsttokens, repo):
-    ipage = 1  # url page counter
-    ct = 0  # token counter
+# @dict_files: dictionary {filename -> count of touches}
+# @lst_tokens: list of tokens for GitHub
+# @repo: string "owner/repo", e.g. "scottyab/rootbeer"
+def countfiles(dict_files, lst_tokens, repo):
+    ipage = 1  # pagination index
+    ct = 0     # token counter
 
     try:
-        # loop though all the commit pages until the last returned empty page
         while True:
             spage = str(ipage)
-            commitsUrl = 'https://api.github.com/repos/' + repo + '/commits?page=' + spage + '&per_page=100'
-            jsonCommits, ct = github_auth(commitsUrl, lsttokens, ct)
+            commits_url = f'https://api.github.com/repos/{repo}/commits?page={spage}&per_page=100'
+            json_commits, ct = github_auth(commits_url, lst_tokens, ct)
 
-            # break out of the while loop if there are no more commits in the pages
-            if len(jsonCommits) == 0:
+            # If no more commits, break
+            if not json_commits or len(json_commits) == 0:
                 break
-            # iterate through the list of commits in  spage
-            for shaObject in jsonCommits:
-                sha = shaObject['sha']
-                # For each commit, use the GitHub commit API to extract the files touched by the commit
-                shaUrl = 'https://api.github.com/repos/' + repo + '/commits/' + sha
-                shaDetails, ct = github_auth(shaUrl, lsttokens, ct)
-                filesjson = shaDetails['files']
-                for filenameObj in filesjson:
-                    filename = filenameObj['filename']
-                    # Only process files with specified extensions
-                    if any(filename.endswith(ext) for ext in source_file_extensions):
-                        dictfiles[filename] = dictfiles.get(filename, 0) + 1
-                        print(filename)
 
-                        # Collect authors and dates for each file
-                        try:
-                            log_output = subprocess.check_output(
-                                ["git", "log", "--pretty=format:%an %ad", "--", filename],
-                                text=True
-                            )
-                            # Save authors and dates to a file
-                            sanitized_filename = filename.replace("/", "_")
-                            with open(f"data/authors_{sanitized_filename}.txt", 'w') as log_file:
-                                log_file.write(log_output)
-                        except subprocess.CalledProcessError:
-                            print(f"Failed to get log for {filename}")
+            # For each commit, get the file list (sha -> commit details)
+            for commit_obj in json_commits:
+                sha = commit_obj['sha']
+                sha_url = f'https://api.github.com/repos/{repo}/commits/{sha}'
+                sha_details, ct = github_auth(sha_url, lst_tokens, ct)
+                if not sha_details:
+                    continue
+
+                files_json = sha_details.get('files', [])
+                for fobj in files_json:
+                    filename = fobj['filename']
+                    # filter by extension
+                    if is_source_file(filename):
+                        dict_files[filename] = dict_files.get(filename, 0) + 1
+
             ipage += 1
-    except:
-        print("Error receiving data")
+    except Exception as e:
+        print(f"Error receiving data: {e}")
         exit(0)
-# GitHub repo
-repo = 'scottyab/rootbeer'
-# repo = 'Skyscanner/backpack' # This repo is commit heavy. It takes long to finish executing
-# repo = 'k9mail/k-9' # This repo is commit heavy. It takes long to finish executing
-# repo = 'mendhak/gpslogger'
 
+def is_source_file(filename):
+    # check the extension
+    # you could also do more advanced checks, for example .startswith() or analyzing file content
+    lower_name = filename.lower()
+    for ext in SOURCE_FILE_EXTENSIONS:
+        if lower_name.endswith(ext):
+            return True
+    return False
+
+# ------------------ Main Execution ------------------
+# for example, scottyab/rootbeer
+repo = 'scottyab/rootbeer'
 
 # put your tokens here
-# Remember to empty the list when going to commit to GitHub.
-# Otherwise they will all be reverted and you will have to re-create them
-# I would advise to create more than one token for repos with heavy commits
 lstTokens = []
 
 dictfiles = dict()
 countfiles(dictfiles, lstTokens, repo)
-print('Total number of files: ' + str(len(dictfiles)))
+print('Total number of source files: ' + str(len(dictfiles)))
 
-file = repo.split('/')[1]
-# change this to the path of your file
-fileOutput = 'data/file_' + file + '.csv'
-rows = ["Filename", "Touches"]
-fileCSV = open(fileOutput, 'w')
-writer = csv.writer(fileCSV)
-writer.writerow(rows)
+repo_name = repo.split('/')[1]
+fileOutput = f"data/file_{repo_name}_sourcefiles.csv"
 
-bigcount = None
-bigfilename = None
-for filename, count in dictfiles.items():
-    rows = [filename, count]
-    writer.writerow(rows)
-    if bigcount is None or count > bigcount:
-        bigcount = count
-        bigfilename = filename
-fileCSV.close()
-print('The file ' + bigfilename + ' has been touched ' + str(bigcount) + ' times.')
+with open(fileOutput, 'w', newline='', encoding='utf-8') as fileCSV:
+    writer = csv.writer(fileCSV)
+    writer.writerow(["Filename", "Touches"])
+
+    bigcount = None
+    bigfilename = None
+
+    for filename, count in dictfiles.items():
+        writer.writerow([filename, count])
+        if bigcount is None or count > bigcount:
+            bigcount = count
+            bigfilename = filename
+
+print(f'The source file "{bigfilename}" has been touched {bigcount} times.')
