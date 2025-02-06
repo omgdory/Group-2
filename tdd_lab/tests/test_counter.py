@@ -37,6 +37,6 @@ class TestCounterEndpoints:
     # Description: Create a counter and check that the status indicates creation
     # ===========================
     def test_create_new_counter(self, client):
-        """It should create a counter"""
-        result = client.post('/counters/foo')
+        """It should create a counter (NOT the same as the example above)"""
+        result = client.post('/new_counters/bar')
         assert result.status_code == status.HTTP_201_CREATED

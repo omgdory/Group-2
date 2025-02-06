@@ -28,7 +28,7 @@ def create_counter(name):
 # Date: 2025-02-04
 # Description: Attempts to create a counter
 # ===========================
-@app.route('/counters/<name>', methods=['POST'])
+@app.route('/new_counters/<name>', methods=['POST'])
 def create_new_counter(name):
   # check if the counter already exists
   if counter_exists(name):
