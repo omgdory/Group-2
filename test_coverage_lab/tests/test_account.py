@@ -134,12 +134,14 @@ def test_set_password():
     account.set_password(password)
     db.session.add(account)
     db.session.commit
+
+    # check that the password is stored 
+    assert account.password_hash is not None
     
-    # check that password is hashed and stored
+    # check that password is hashed
     assert account.password_hash != password
     
-    # is this necessasry ?
-    #assert account.password_hash is not None
+    
 
     
 
