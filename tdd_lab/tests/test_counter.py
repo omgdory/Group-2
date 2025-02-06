@@ -16,6 +16,7 @@ from src import app
 from src import status
 from flask import json #for test case 3
 
+
 @pytest.fixture(autouse=True) # ensures that test 10 starts with a clean slate every time
 def reset_counters():
     """Reset counters before each test"""
@@ -37,6 +38,19 @@ class TestCounterEndpoints:
         """It should create a counter"""
         result = client.post('/counters/foo')
         assert result.status_code == status.HTTP_201_CREATED
+
+    
+    # ===========================
+    # Feature: Create a new counter (POST /counters/<name>)
+    # Author: Dorian Akhavan
+    # Date: 2025-02-04
+    # Description: Create a counter and check that the status indicates creation
+    # ===========================
+    def test_create_new_counter(self, client):
+        """It should create a counter (NOT the same as the example above)"""
+        result = client.post('/new_counters/bar')
+        assert result.status_code == status.HTTP_201_CREATED
+
 
     # ===========================  
     # Test: Delete Counter (DELETE /counters/<name>)  
@@ -152,3 +166,4 @@ class TestCounterEndpoints:
         assert 'bar' in data
         assert data['foo'] == 0
         assert data['bar'] == 0
+

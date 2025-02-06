@@ -23,6 +23,23 @@ def create_counter(name):
   COUNTERS[name] = 0
   return jsonify({name: COUNTERS[name]}), status.HTTP_201_CREATED
 
+
+# ===========================
+# Feature: Create a new counter (POST /counters/<name>)
+# Author: Dorian Akhavan
+# Date: 2025-02-04
+# Description: Attempts to create a counter
+# ===========================
+@app.route('/new_counters/<name>', methods=['POST'])
+def create_new_counter(name):
+  # check if the counter already exists
+  if counter_exists(name):
+    # counter exists; can't create
+    return jsonify({"error": f"Counter {name} already exists. Unable to create."}), status.HTTP_409_CONFLICT
+  # counter DNE, so create it
+  COUNTERS[name] = 0
+  return jsonify({name: COUNTERS[name]}),status.HTTP_201_CREATED
+
 # ===========================  
 # Feature: Delete Counter (DELETE /counters/<name>)  
 # Author: Franklin La Rosa Diaz  
@@ -83,3 +100,4 @@ def get_counter(name):
 def list_counters():
     """List all counters"""
     return jsonify(COUNTERS), status.HTTP_200_OK
+
