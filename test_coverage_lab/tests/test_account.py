@@ -282,10 +282,50 @@ def test_withdraw_insufficient_funds():
     # Verify balance remains unchanged
     assert retrieved_account.balance == 50.0  # Balance should not have changed
 
+# ===========================
+# Test: Password Hashing
+# Author: Sameer Issa
+# Date: 2025-02-03
+# Description: Ensure that passwords are hashed and set properly
+# ===========================
 # TODO 8: Test Password Hashing
 # - Ensure that passwords are stored as **hashed values**.
 # - Verify that plaintext passwords are never stored in the database.
 # - Test password verification with `set_password()` and `check_password()`.
+def test_set_password():
+    """Test that the password is hashed and stored correctly"""
+    
+    password = "password1"
+
+    # create account and set password, then commit to db
+    account = Account(name="person one",email="person1@example.com",role="user")
+    account.set_password(password)
+    db.session.add(account)
+    db.session.commit
+
+    # check that the password is stored 
+    assert account.password_hash is not None
+    
+    # check that password is hashed
+    assert account.password_hash != password
+    
+def test_check_password():
+    """Test that given password matches the stored password"""
+    
+    password = "password1"
+
+    # create account and set password, then commit to db
+    account = Account(name="person two",email="person2@example.com",role="user")
+    account.set_password(password)
+    db.session.add(account)
+    db.session.commit
+
+    # check for correct password
+    assert account.check_password(password)
+    # check for wrong password
+    assert not account.check_password("password2")
+    
+
 
 # TODO 9: Test Role Assignment
 # - Ensure that `change_role()` correctly updates an account’s role.
