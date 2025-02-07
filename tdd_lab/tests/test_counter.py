@@ -27,3 +27,15 @@ class TestCounterEndpoints:
         """It should create a counter"""
         result = client.post('/counters/foo')
         assert result.status_code == status.HTTP_201_CREATED
+    
+    # ===========================
+    # Test: Prevent deleting non-existent counter 	DELETE /counters/<name>
+    # Author: Sameer Issa
+    # Date: 2025-02-05
+    # Description: Assert that counter can't be deleted if counter doesn't exist
+    # ===========================
+    def test_deleting_nonexistant_counter(self, client):
+        name = '/counters/test_case_8'
+        response = client.delete(name)
+        # assert the counter does not exist
+        assert response.status_code == status.HTTP_404_NOT_FOUND
