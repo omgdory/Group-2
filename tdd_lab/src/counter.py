@@ -42,7 +42,7 @@ def create_new_counter(name):
 
 # ===========================  
 # Feature: Delete Counter (DELETE /counters/<name>)  
-# Author: Franklin La Rosa Diaz  
+# Author: Franklin La Rosa Diaz  / Sameer Issa
 # Date: 2025-02-02  
 # Description: Implements the `delete_counter()` function to remove an existing counter.  
 # Returns a 204 No Content status upon successful deletion.  
@@ -56,6 +56,7 @@ def delete_counter(name):
       return jsonify({"error": f"Counter {name} not found"}), status.HTTP_404_NOT_FOUND
   del COUNTERS[name]
   return '', status.HTTP_204_NO_CONTENT
+
 
 # ===========================
 # Feature: Increment Counter (PUT/counter/<name>) / Check if non-existent
