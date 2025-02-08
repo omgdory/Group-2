@@ -145,6 +145,20 @@ class TestCounterEndpoints:
         assert "test_counter" in data
 
     # ===========================
+    # Test: Return 404 for non-existent counter (GET /counters)
+    # Author: Aviendha Andrus
+    # Date: 2025-02-06
+    # Description: Returns a 404 error when attempting to retrieve a 
+    # counter that does not exist.
+    # ===========================
+    def test_get_nonexistent_counter(self, client):
+        """It should return 404 when retrieving a non-existent counter"""
+        name = '/counters/non_existent'
+        result = client.get(name)
+        assert result.status_code == status.HTTP_404_NOT_FOUND
+        assert result.json == {"error": "Counter not found"}
+
+    # ===========================
     # Test: Lists all the counters
     # Author: Christopher Liscano
     # Date: 2025-02-04
