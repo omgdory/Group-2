@@ -157,6 +157,38 @@ class TestCounterEndpoints:
         result = client.get(name)
         assert result.status_code == status.HTTP_404_NOT_FOUND
         assert result.json == {"error": "Counter not found"}
+    
+    # ===========================
+    # Feature: Reset all counters	POST /counters/reset
+    # Author: Allison Kameda
+    # Date: 2025-02-07
+    # Description: Reset all the counters to 0
+    # ===========================
+    def test_reset_counters(self, client):
+        """It should reset all counters to 0"""
+        # Create counters
+        client.post('/counters/foo')
+        client.post('/counters/bar')
+        
+        # Verify counters are created
+        result = client.get('/counters')
+        assert result.status_code == status.HTTP_200_OK
+        data = result.get_json()
+        assert len(data) == 2
+        assert 'foo' in data
+        assert 'bar' in data
+        assert data['foo'] == 0
+        assert data['bar'] == 0
+        
+        # Reset all counters
+        result = client.post('/counters/reset')
+        assert result.status_code == status.HTTP_204_NO_CONTENT
+        
+        # Verify all counters have been reset
+        result = client.get('/counters')
+        assert result.status_code == status.HTTP_200_OK
+        data = result.get_json()
+        assert len(data) == 0  # No counters should be left
 
     # ===========================
     # Test: Lists all the counters
