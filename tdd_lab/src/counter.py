@@ -116,4 +116,14 @@ def list_counters():
     """List all counters"""
     return jsonify(COUNTERS), status.HTTP_200_OK
 
-
+# ===========================
+# Feature: Handle invalid HTTP methods     (Unsupported HTTP Methods)
+# Author: Ethan Zambrano
+# Date: 2025-02-07
+# Description: Ensures that when a client tries to use a invalid HTTP method on a route, that 
+#              the server responds when it's a 404, 405, or 500 (whenever applicable) error.
+# ===========================
+@app.errorhandler(405)
+def method_not_allowed(error):
+    """Handle unsupported HTTP methods"""
+    return jsonify({"error": "Method Not Allowed"}), status.HTTP_405_METHOD_NOT_ALLOWED
