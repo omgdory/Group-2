@@ -23,9 +23,26 @@ def create_counter(name):
   COUNTERS[name] = 0
   return jsonify({name: COUNTERS[name]}), status.HTTP_201_CREATED
 
+
+# ===========================
+# Feature: Create a new counter (POST /counters/<name>)
+# Author: Dorian Akhavan
+# Date: 2025-02-04
+# Description: Attempts to create a counter
+# ===========================
+@app.route('/new_counters/<name>', methods=['POST'])
+def create_new_counter(name):
+  # check if the counter already exists
+  if counter_exists(name):
+    # counter exists; can't create
+    return jsonify({"error": f"Counter {name} already exists. Unable to create."}), status.HTTP_409_CONFLICT
+  # counter DNE, so create it
+  COUNTERS[name] = 0
+  return jsonify({name: COUNTERS[name]}),status.HTTP_201_CREATED
+
 # ===========================  
 # Feature: Delete Counter (DELETE /counters/<name>)  
-# Author: Franklin La Rosa Diaz  
+# Author: Franklin La Rosa Diaz  / Sameer Issa
 # Date: 2025-02-02  
 # Description: Implements the `delete_counter()` function to remove an existing counter.  
 # Returns a 204 No Content status upon successful deletion.  
@@ -39,6 +56,7 @@ def delete_counter(name):
       return jsonify({"error": f"Counter {name} not found"}), status.HTTP_404_NOT_FOUND
   del COUNTERS[name]
   return '', status.HTTP_204_NO_CONTENT
+
 
 # ===========================
 # Feature: Increment Counter (PUT/counter/<name>) / Check if non-existent
@@ -74,6 +92,20 @@ def get_counter(name):
     return jsonify({"error": "Counter not found"}), 404
 
 # ===========================
+# Test: Return 404 for non-existent counter (GET /counters)
+# Author: Aviendha Andrus
+# Date: 2025-02-06
+# Description: GET endpoint to retrieve a 404 error if counter does not exist
+# this test is also covered by get_counter function above
+# ===========================
+@app.route('/counters/<name>', methods=['GET'])
+def return_nonexistant(name):
+    """Return 404 if not found"""
+    if name not in COUNTERS:
+        return jsonify({"error": f"Counter not found"}), status.HTTP_404_NOT_FOUND
+    return jsonify({name: COUNTERS[name]}), status.HTTP_200_OK
+
+# ===========================
 # Feature: List all counters
 # Author: Christopher Liscano
 # Date: 2025-02-04
@@ -83,3 +115,5 @@ def get_counter(name):
 def list_counters():
     """List all counters"""
     return jsonify(COUNTERS), status.HTTP_200_OK
+
+
