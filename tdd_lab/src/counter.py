@@ -106,6 +106,19 @@ def return_nonexistant(name):
     return jsonify({name: COUNTERS[name]}), status.HTTP_200_OK
 
 # ===========================
+# Feature: Reset all counters	POST /counters/reset
+# Author: Allison Kameda
+# Date: 2025-02-07
+# Description: Reset all the counters to 0
+# ===========================
+@app.route('/counters/reset', methods=['POST'])
+def reset_counters():
+  # Reset all counters
+    COUNTERS.clear()
+    return '', status.HTTP_204_NO_CONTENT
+
+
+# ===========================
 # Feature: List all counters
 # Author: Christopher Liscano
 # Date: 2025-02-04
