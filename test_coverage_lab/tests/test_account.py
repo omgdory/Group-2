@@ -372,3 +372,28 @@ def test_invalid_role_assignment():
 # - Ensure that `delete()` removes an account from the database.
 # - Verify that attempting to retrieve a deleted account returns `None` or raises an error.
 
+# Above TODO isn't on class website, will be focusing on the class website test case for student 11
+
+# ===========================
+# Test: Deleting an Account
+# Author: Ethan Zambrano
+# Date: 2025-02-07
+# Description: Create an account, verify that it exists, test deleting it, and then confirming its removal
+# ===========================
+
+def test_deleting_an_account():
+    """Test deleting an account"""
+    # First create a test account
+    account = Account(name="Ethan Zambrano", email="ethanz@example.com")
+    db.session.add(account)
+    db.session.commit()
+
+    # Verify that the account exists within the database
+    assert Account.query.get(account.id) is not None
+
+    # Delete the test account
+    db.session.delete(account)
+    db.session.commit()
+
+    # Confirm/verify that the account is deleted 
+    assert Account.query.get(account.id) is None
