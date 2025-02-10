@@ -92,6 +92,33 @@ def get_counter(name):
     return jsonify({"error": "Counter not found"}), 404
 
 # ===========================
+# Test: Return 404 for non-existent counter (GET /counters)
+# Author: Aviendha Andrus
+# Date: 2025-02-06
+# Description: GET endpoint to retrieve a 404 error if counter does not exist
+# this test is also covered by get_counter function above
+# ===========================
+@app.route('/counters/<name>', methods=['GET'])
+def return_nonexistant(name):
+    """Return 404 if not found"""
+    if name not in COUNTERS:
+        return jsonify({"error": f"Counter not found"}), status.HTTP_404_NOT_FOUND
+    return jsonify({name: COUNTERS[name]}), status.HTTP_200_OK
+
+# ===========================
+# Feature: Reset all counters	POST /counters/reset
+# Author: Allison Kameda
+# Date: 2025-02-07
+# Description: Reset all the counters to 0
+# ===========================
+@app.route('/counters/reset', methods=['POST'])
+def reset_counters():
+  # Reset all counters
+    COUNTERS.clear()
+    return '', status.HTTP_204_NO_CONTENT
+
+
+# ===========================
 # Feature: List all counters
 # Author: Christopher Liscano
 # Date: 2025-02-04
@@ -102,4 +129,14 @@ def list_counters():
     """List all counters"""
     return jsonify(COUNTERS), status.HTTP_200_OK
 
-
+# ===========================
+# Feature: Handle invalid HTTP methods     (Unsupported HTTP Methods)
+# Author: Ethan Zambrano
+# Date: 2025-02-07
+# Description: Ensures that when a client tries to use a invalid HTTP method on a route, that 
+#              the server responds when it's a 404, 405, or 500 (whenever applicable) error.
+# ===========================
+@app.errorhandler(405)
+def method_not_allowed(error):
+    """Handle unsupported HTTP methods"""
+    return jsonify({"error": "Method Not Allowed"}), status.HTTP_405_METHOD_NOT_ALLOWED

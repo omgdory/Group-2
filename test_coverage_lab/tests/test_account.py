@@ -330,6 +330,37 @@ def test_check_password():
 # TODO 9: Test Role Assignment
 # - Ensure that `change_role()` correctly updates an account’s role.
 # - Verify that the updated role is stored in the database.
+# ===========================
+# Test: Test account deactivation/reactivation
+# Author: Allison Kameda
+# Date: 2025-02-05
+# Description: Ensure the target methods `deactivate()` / `reactivate()` are functioning.
+# ===========================
+def test_account_deactivation_reactivation():
+    # Create a test account
+    account = Account(name="Jimi Vasko", email="jimi@example.com", role="user")
+    db.session.add(account)
+    db.session.commit()
+
+    # Retrieve from database
+    retrieved_account = Account.query.filter_by(email="jimi@example.com").first()
+    assert retrieved_account.disabled == False  # Account should be active initially
+
+    # Deactivate the account
+    retrieved_account.deactivate()
+    db.session.commit()
+
+    # Check that account is deactivated
+    deactivated_account = Account.query.filter_by(email="jimi@example.com").first()
+    assert deactivated_account.disabled == True
+
+    # Reactivate the account
+    deactivated_account.reactivate()
+    db.session.commit()
+
+    # Check that account is reactivated
+    reactivated_account = Account.query.filter_by(email="jimi@example.com").first()
+    assert reactivated_account.disabled == False
 
 # TODO 10: Test Invalid Role Assignment
 # - Ensure that assigning an invalid role raises an appropriate error.
@@ -372,3 +403,28 @@ def test_invalid_role_assignment():
 # - Ensure that `delete()` removes an account from the database.
 # - Verify that attempting to retrieve a deleted account returns `None` or raises an error.
 
+# Above TODO isn't on class website, will be focusing on the class website test case for student 11
+
+# ===========================
+# Test: Deleting an Account
+# Author: Ethan Zambrano
+# Date: 2025-02-07
+# Description: Create an account, verify that it exists, test deleting it, and then confirming its removal
+# ===========================
+
+def test_deleting_an_account():
+    """Test deleting an account"""
+    # First create a test account
+    account = Account(name="Ethan Zambrano", email="ethanz@example.com")
+    db.session.add(account)
+    db.session.commit()
+
+    # Verify that the account exists within the database
+    assert Account.query.get(account.id) is not None
+
+    # Delete the test account
+    db.session.delete(account)
+    db.session.commit()
+
+    # Confirm/verify that the account is deleted 
+    assert Account.query.get(account.id) is None
