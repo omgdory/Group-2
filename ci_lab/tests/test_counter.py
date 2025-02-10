@@ -181,6 +181,7 @@ class TestCounterEndpoints:
         assert response_negative.status_code == HTTPStatus.BAD_REQUEST  
         
         # TODO: Add an assertion to verify the response message contains a clear error
+        assert response_negative.get_json() == {"error": "Counter value cannot be negative"}
 
     # ===========================
     # Test: Reset a single counter
