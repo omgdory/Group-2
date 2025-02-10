@@ -23,7 +23,7 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r ci_lab/requirements.txt
 
       - name: Run Tests with Pytest
         run: pytest --cov=ci_lab/src --cov-report=term-missing
