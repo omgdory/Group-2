@@ -143,7 +143,7 @@ class TestCounterEndpoints:
         client.post('/counters/a')
         client.post('/counters/b')
 
-        response = client.get('/counters/bottom/1')
+        response = client.get('/counters/bottom/2') # this was set to /1 changed it to /2 
 
         assert response.status_code == HTTPStatus.OK
         assert min(response.get_json().values()) == 0  
