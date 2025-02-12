@@ -96,7 +96,7 @@ class TestCounterEndpoints:
 
     # ===========================
     # Test: Retrieve total count of all counters
-    # Author: Student 1
+    # Author: Dorian Akhavan
     # Modification: Add assertion to check the total value is correct.
     # ===========================
     def test_get_total_counters(self, client):
@@ -110,6 +110,10 @@ class TestCounterEndpoints:
         assert response.status_code == HTTPStatus.OK
         
         # TODO: Add an assertion to check the correct total value
+        # counter test1 incremented once, test 2 not incremented
+        # so, total sum should be 1
+        deserialized_response = response.get_json()
+        assert deserialized_response["total"] == 1
 
 
     # ===========================
