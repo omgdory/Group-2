@@ -201,7 +201,7 @@ class TestCounterEndpoints:
 
     # ===========================
     # Test: Reset a single counter
-    # Author: Student 6
+    # Author: Student 6 (Charles Joseph Ballesteros)
     # Modification: Ensure counter still exists after reset.
     # ===========================
     def test_reset_single_counter(self, client):
@@ -215,6 +215,9 @@ class TestCounterEndpoints:
         assert response.get_json() == {"test1": 0}
 
         # TODO: Add an assertion to check that retrieving the counter still works
+        response = client.get('/counters/test1')
+
+        assert response.status_code == HTTPStatus.OK
 
     # ===========================
     # Test: Prevent resetting a non-existent counter
