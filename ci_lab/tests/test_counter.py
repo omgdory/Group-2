@@ -294,7 +294,7 @@ class TestCounterEndpoints:
 
     # ===========================
     # Test: Validate counter names (prevent special characters)
-    # Author: Student 11
+    # Author: Student 11 (Ethan Zambrano)
     # Modification: Ensure error message is specific.
     # ===========================
     def test_validate_counter_name(self, client):
@@ -304,3 +304,4 @@ class TestCounterEndpoints:
         assert response.status_code == HTTPStatus.BAD_REQUEST
 
         # TODO: Add an assertion to verify the error message specifically says 'Invalid counter name'S
+        assert response.get_json() == {"error": "Invalid counter name. Only alphanumeric and underscores allowed."}
