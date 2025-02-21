@@ -26,6 +26,30 @@ void bubbleSort(std::vector<int>& arr) {
     }
 }
 
+// QuickSort function
+int partition(std::vector<int>& arr, int low, int high) {
+    int pivot = arr[high]; // Choosing the last element as the pivot
+    int i = low - 1; // Index of smaller element
+
+    for (int j = low; j < high; j++) {
+        if (arr[j] < pivot) { // If current element is smaller than pivot
+            i++;
+            std::swap(arr[i], arr[j]);
+        }
+    }
+    std::swap(arr[i + 1], arr[high]); // Place pivot in correct position
+    return i + 1;
+}
+
+void quickSort(std::vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+
+        quickSort(arr, low, pi - 1); // Sort elements before pivot
+        quickSort(arr, pi + 1, high); // Sort elements after pivot
+    }
+}
+
 // Function to print the array
 void printArray(const std::vector<int>& arr) {
     for (int num : arr) {
@@ -36,12 +60,12 @@ void printArray(const std::vector<int>& arr) {
 
 int main() {
     std::vector<int> arr = {64, 34, 25, 12, 22, 11, 90};
-    
+
     std::cout << "Original array: ";
     printArray(arr);
 
-    bubbleSort(arr);
-    
+    quickSort(arr, 0, arr.size() - 1);
+
     std::cout << "Sorted array: ";
     printArray(arr);
 
