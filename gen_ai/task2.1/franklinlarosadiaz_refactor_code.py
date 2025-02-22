@@ -1,33 +1,30 @@
 #CS 472 
 #NSHE ID: 5004634201     Franklin La Rosa Diaz
-def checkFile():
+#Refactored code from ChatGPT
+def get_valid_filename():
+    """Prompt the user for a valid filename and return it."""
     while True:
+        fname = input("Enter the file name: \n")
         try:
-            fname = input("Enter the file name: \n")
-            iFile = open(fname)
+            with open(fname, 'r'):
+                print("File accepted. Loading...\n")
+                return fname
         except IOError:
             print("File not accessible. Try again.\n")
-            continue
-        else:
-            iFile.close()
-            print("File accepted. Loading...\n")
-            return fname
 
-def readFile(fname):
+def transcribe_dna_to_rna(dna_sequence):
+    """Convert DNA sequence to RNA by replacing 'T' with 'U'."""
+    return dna_sequence.replace('T', 'U')
+
+def read_file_and_transcribe(fname):
+    """Read a DNA sequence file, transcribe it to RNA, and return the result."""
     with open(fname, 'r') as iFile:
-        for line in iFile:
-            singleLine = " "
-            singleLine = line
-            DNA_to_RNA = replaceT(singleLine)
-            print(DNA_to_RNA, "\n")
-    iFile.close()
+        return [transcribe_dna_to_rna(line.strip()) for line in iFile]
 
-def replaceT(singleLine):
-    singleLine = singleLine.replace('T', 'U')
-    return singleLine
-   
-    
+# Actual Program Execution
+filename = get_valid_filename()
+rna_sequences = read_file_and_transcribe(filename)
 
-#Actual Program
-fname = checkFile()
-readFile(fname)
+# Output the result
+for rna_seq in rna_sequences:
+    print(rna_seq)
