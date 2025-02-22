@@ -21,8 +21,10 @@ void gaussianElimination(std::vector<std::vector<double>>& matrix, std::vector<d
         }
         
         // Swap the maxRow with the current row
-        std::swap(matrix[i], matrix[maxRow]);
-        std::swap(b[i], b[maxRow]);
+        if (maxRow != i) {
+            std::swap(matrix[i], matrix[maxRow]);
+            std::swap(b[i], b[maxRow]);
+        }
 
         // Check for singularity (zero pivot element)
         if (std::fabs(matrix[i][i]) < 1e-10) {
@@ -30,9 +32,16 @@ void gaussianElimination(std::vector<std::vector<double>>& matrix, std::vector<d
             return;
         }
 
+        // Normalize the pivot row
+        double pivot = matrix[i][i];
+        for (int j = i; j < n; ++j) {
+            matrix[i][j] /= pivot;
+        }
+        b[i] /= pivot;
+
         // Eliminate below the pivot
         for (int k = i + 1; k < n; ++k) {
-            double factor = matrix[k][i] / matrix[i][i];
+            double factor = matrix[k][i];
             for (int j = i; j < n; ++j) {
                 matrix[k][j] -= factor * matrix[i][j];
             }
@@ -46,7 +55,7 @@ void gaussianElimination(std::vector<std::vector<double>>& matrix, std::vector<d
         for (int j = i + 1; j < n; ++j) {
             sum -= matrix[i][j] * solution[j];
         }
-        solution[i] = sum / matrix[i][i];
+        solution[i] = sum;
     }
 }
 
