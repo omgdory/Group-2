@@ -134,88 +134,17 @@ description: a function that returns the longest path from node r.
 */
 std::vector<std::string> binTree::zigzag(binTreeNode *r, bool childType, std::vector<std::string> path)
 {
-    std::vector<std::string> empty; // used for clearing the zigzag
-    std::vector<std::string> leftPath;
-    std::vector<std::string> rightPath;
-    std::vector<std::string> result; // for storing the longest zigzag
+    if (!r) return path; // Base case: return current path if node is null
 
-    if (!(path.empty())) // if a path exists
-    {
-        for (unsigned int i = 0; i < path.size(); i++)
-        {
-            result.push_back(path[i]); // getting paths from previous iterations
-        }
-    }
+    path.push_back(r->location); // Include current node in the path
 
-    // BASE CASE //
-    if (r == nullptr) // if zigzag reaches the end OR if zigzag is empty
-        return result;
+    std::vector<std::string> leftPath, rightPath;
 
-    // GENERAL CASES //
-    if (childType) // LEFT SIDE
-    {
-        if (r->left == nullptr && r->right == nullptr && result.size() > 2) // checks if end of zigzag. We check size because a zigzag at minimum is 3 nodes
-        {
-            result.push_back(r->location);                        // push the last character in zigzag
-            rightPath = binTree::zigzag(r->right, false, result); // getting zigzag
-            return rightPath;
-        }
+    if (childType) // Coming from the left, move to the right
+        rightPath = zigzag(r->right, false, path);
+    else // Coming from the right, move to the left
+        leftPath = zigzag(r->left, true, path);
 
-        if (r->right != nullptr) // checking for zigzag on the right b/c we're on the left
-        {
-            result.push_back(r->location);                        // adding a potential zigzag
-            rightPath = binTree::zigzag(r->right, false, result); // since we're on the right node, check the left node
-        }
-        else
-            rightPath = binTree::zigzag(r->right, false, empty); // if no node, return empty list
-
-        if (r->left != nullptr) // checking for a left node, if one exists, create a new zigzag
-        {
-            result.clear();
-            result.push_back(r->location);                     // potential zigzag
-            leftPath = binTree::zigzag(r->left, true, result); // checking left nodes
-        }
-        else
-            leftPath = binTree::zigzag(r->left, true, empty); // empty list
-
-        // finding out which one is the larger path
-        if (leftPath.size() > rightPath.size())
-            return leftPath;
-        else
-            return rightPath;
-    }
-    else // RIGHT SIDE
-    {
-        if (r->left == nullptr && r->right == nullptr && result.size() > 2) // checking if at end
-        {
-            result.push_back(r->location);
-            leftPath = binTree::zigzag(r->left, true, result);
-            return leftPath;
-        }
-
-        if (r->left != nullptr) // checking for zigzag on the left b/c we're on the right
-        {
-            result.push_back(r->location);
-            leftPath = binTree::zigzag(r->left, true, result);
-        }
-        else
-            leftPath = binTree::zigzag(r->left, true, empty); // empty list
-
-        if (r->right != nullptr) // checking for a right node, if one exists, create a new zigzag
-        {
-            result.clear();
-            result.push_back(r->location);
-            rightPath = binTree::zigzag(r->right, false, result);
-        }
-        else
-            rightPath = binTree::zigzag(r->right, false, empty);
-
-        // finding out which one is the larger path
-        if (leftPath.size() > rightPath.size())
-            return leftPath;
-        else
-            return rightPath;
-    }
-
-    return empty; // if left and right nodes are empty
+    // Compare and return the longest path
+    return (leftPath.size() > rightPath.size()) ? std::move(leftPath) : std::move(rightPath);
 }
