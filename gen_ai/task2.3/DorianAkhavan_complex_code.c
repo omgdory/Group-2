@@ -1,56 +1,105 @@
 // Source: https://bit.ly/2BITbQm
+// De-complex-ified with ChatGPT
 #include <math.h>
 #include <stdio.h>
-#include <cstring>
+#include <string.h> // Use <string.h> instead of <cstring> for C compatibility
+
+#define SCREEN_WIDTH 80
+#define SCREEN_HEIGHT 22
+#define BUFFER_SIZE (SCREEN_WIDTH * SCREEN_HEIGHT)
+
+// ASCII luminance gradient for shading
+const char SHADING_CHARS[] = ".,-~:;=!*#$@";
+
+// Function prototypes
+void clearScreen();
+void renderFrame(float A, float B);
 
 int main()
 {
-  float A = 0, B = 0;
-  float i, j;
-  int k;
-  float z[1760]; // 80 * 22
-  char b[1760];
-  printf("\x1b[2J"); // clear terminal screen
-  for (;;)
+  float A = 0, B = 0; // Rotation angles
+
+  printf("\x1b[2J"); // Clear terminal screen
+
+  while (1)
   {
-    memset(b, 32, 1760);
-    memset(z, 0, 7040);
-    // draws circle (theta)
-    for (j = 0; j < 6.28; j += 0.014)
+    renderFrame(A, B);
+    A += 0.00004; // Increment rotation angle A
+    B += 0.00002; // Increment rotation angle B
+  }
+
+  return 0;
+}
+
+/**
+ * Clears the terminal screen by moving the cursor to the top-left corner.
+ */
+void clearScreen()
+{
+  printf("\x1b[H"); // ANSI escape code to reset cursor position
+}
+
+/**
+ * Renders a frame of the spinning donut.
+ *
+ * @param A Rotation angle around the x-axis.
+ * @param B Rotation angle around the z-axis.
+ */
+void renderFrame(float A, float B)
+{
+  char buffer[BUFFER_SIZE];   // Character buffer for rendering
+  float zBuffer[BUFFER_SIZE]; // Depth buffer to store depth values
+
+  // Initialize buffers
+  memset(buffer, ' ', BUFFER_SIZE);
+  memset(zBuffer, 0, sizeof(zBuffer));
+
+  // Iterate over torus angles (theta for the circle, phi for the rotation)
+  for (float theta = 0; theta < 2 * M_PI; theta += 0.014)
+  {
+    for (float phi = 0; phi < 2 * M_PI; phi += 0.004)
     {
-      // rotate around y-axis to make donut/torus (phi)
-      for (i = 0; i < 6.28; i += 0.004)
+      // Compute torus coordinates
+      float sinTheta = sin(theta);
+      float cosTheta = cos(theta);
+      float sinPhi = sin(phi);
+      float cosPhi = cos(phi);
+
+      float sinA = sin(A);
+      float cosA = cos(A);
+      float sinB = sin(B);
+      float cosB = cos(B);
+
+      float circleX = cosTheta + 2; // Circle radius + torus radius
+      float circleY = sinTheta;
+
+      // Compute 3D point position after rotation
+      float invZ = 1 / (sinPhi * circleX * sinA + circleY * cosA + 5);
+      float projX = sinPhi * circleX * cosA - circleY * sinA;
+      float projY = cosPhi * circleX;
+
+      // Project 3D point onto 2D screen
+      int x = SCREEN_WIDTH / 2 + SCREEN_WIDTH / 4 * invZ * (projX * cosB - projY * sinB);
+      int y = SCREEN_HEIGHT / 2 + SCREEN_HEIGHT / 4 * invZ * (projX * sinB + projY * cosB);
+      int bufferIndex = x + SCREEN_WIDTH * y;
+
+      // Compute luminance
+      int luminanceIndex = 8 * ((circleY * sinA - sinPhi * cosTheta * cosA) * cosB -
+                                sinPhi * cosTheta * sinA - circleY * cosA - cosPhi * cosTheta * sinB);
+
+      // Bounds checking before modifying the buffer
+      if (y >= 0 && y < SCREEN_HEIGHT && x >= 0 && x < SCREEN_WIDTH && invZ > zBuffer[bufferIndex])
       {
-        float c = sin(i);
-        float d = cos(j);
-        float e = sin(A);
-        float f = sin(j);
-        float g = cos(A);
-        float h = d + 2;
-        float D = 1 / (c * h * e + f * g + 5);
-        float l = cos(i);
-        float m = cos(B);
-        float n = sin(B);
-        float t = c * h * g - f * e;
-        int x = 40 + 30 * D * (l * h * m - t * n);
-        int y = 12 + 15 * D * (l * h * n + t * m);
-        int o = x + 80 * y;
-        int N = 8 * ((f * e - c * d * g) * m - c * d * e - f * g - l * d * n);
-        if (22 > y && y > 0 && x > 0 && 80 > x && D > z[o])
-        {
-          z[o] = D;
-          b[o] = ".,-~:;=!*#$@"[N > 0 ? N : 0];
-        }
+        zBuffer[bufferIndex] = invZ;
+        buffer[bufferIndex] = SHADING_CHARS[luminanceIndex > 0 ? luminanceIndex : 0];
       }
     }
-    printf("\x1b[H"); // move cursor to beginning of terminal
-    for (k = 0; k < 1761; k++)
-    {
-      putchar(k % 80 ? b[k] : 10);
-      A += 0.00004;
-      B += 0.00002;
-    }
-    // usleep(300);
   }
-  return 0;
+
+  // Clear the screen and render the frame
+  clearScreen();
+  for (int i = 0; i < BUFFER_SIZE; i++)
+  {
+    putchar(i % SCREEN_WIDTH ? buffer[i] : '\n');
+  }
 }
